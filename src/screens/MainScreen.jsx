@@ -15,36 +15,9 @@ import {fetchLatestDetectionRequest} from '../store/stateSlice/inventorySlice';
 import {itemMap} from '../services/itemMap';
 import {itemImage} from '../img/imgService';
 
-const results = [
-  {
-    class_id: '7',
-    count: 1,
-    timestamp: '2024-06-02T16:00:00Z',
-  },
-  {
-    class_id: '8',
-    count: 1,
-    timestamp: '2024-06-02T13:30:20Z',
-  },
-  {
-    class_id: '21',
-    count: 4,
-    timestamp: '2024-06-02T13:30:20Z',
-  },
-  {
-    class_id: '18',
-    count: 1,
-    timestamp: '2024-06-02T13:33:39Z',
-  },
-  {
-    class_id: '19',
-    count: 1,
-    timestamp: '2024-06-02T16:00:00Z',
-  },
-];
-
 const MainScreen = ({navigation}) => {
   const latestDetection = useSelector(state => state.inventory.latestDetection);
+  const manuallyAdded = useSelector(state => state.manually?.items);
   const dispatch = useDispatch();
   const [displayMode, setDisplayMode] = useState('缩略');
   const [showModal, setShowModal] = useState(false);
@@ -55,22 +28,29 @@ const MainScreen = ({navigation}) => {
 
   console.log('showlatestDetection');
 
-  // const data = latestDetection?.results?.map(item => ({
-  //   id: item.class_id,
-  //   name: itemMap[item.class_id],
-  //   timestamp: item.timestamp,
-  //   quantity: item.count,
-  //   image: itemImage(item.class_id),
-  // }));
-  const data = results?.map(item => ({
+  const data = latestDetection?.results?.map(item => ({
     id: item.class_id,
     name: itemMap[item.class_id],
     timestamp: item.timestamp,
     quantity: item.count,
     image: itemImage(item.class_id),
   }));
+
+  console.log('manuallyAdded');
+  console.log(manuallyAdded);
+  if (manuallyAdded.length) {
+    console.log('showmanuallyAdded!!!!!');
+    data.push(manuallyAdded);
+  }
+  // const data = latestDetection.results?.map(item => ({
+  //   id: item.class_id,
+  //   name: itemMap[item.class_id],
+  //   timestamp: item.timestamp,
+  //   quantity: item.count,
+  //   image: itemImage(item.class_id),
+  // }));
   console.log('data::::');
-  // console.log(data);
+  console.log(data);
 
   const formatTimestamp = timestamp => {
     const date = new Date(timestamp);
@@ -106,7 +86,7 @@ const MainScreen = ({navigation}) => {
       <FlatList
         data={data}
         renderItem={renderCard}
-        keyExtractor={item => item.id.toString()}
+        // keyExtractor={item => item.id?.toString()}
       />
     </View>
   );

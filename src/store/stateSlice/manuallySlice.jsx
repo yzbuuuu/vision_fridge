@@ -15,6 +15,7 @@ const manuallySlice = createSlice({
       state.error = null;
     },
     addItemSuccess: (state, action) => {
+      // console.log(action.payload)
       state.loading = false;
       state.items.push(action.payload);
     },

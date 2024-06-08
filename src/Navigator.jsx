@@ -16,7 +16,7 @@ import {
 import MainScreen from './screens/MainScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import {useDispatch, useSelector} from 'react-redux';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 
 import {
   fetchLatestDetectionRequest,
@@ -37,15 +37,22 @@ const renderLeft = navigation => (
   <Button title="补货设置" onPress={() => navigation.navigate('ModalPage')} />
 );
 
-const AddModal = () => {
+const AddModal = ({navigation}) => {
   console.log('addmodalactivated');
   // const manuallyAddItem = useSelector(state => state.manually.items);
   const dispatch = useDispatch();
-  const [imageUri, setImageUri] = useState(null);
+  const [image, setImage] = useState(null);
   const [name, setName] = useState('');
-  const [quantity, setQuantity] = useState('');
+  const [count, setQuantity] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [imageBase64, setImageBase64] = useState(null);
+  const [currentDateTime, setCurrentDateTime] = useState(
+    new Date(),
+  );
+
+  const updateDateTime = () => {
+    setCurrentDateTime(new Date().toLocaleString());
+  };
 
   const handleSelectImage = () => {
     launchImageLibrary(
@@ -55,7 +62,7 @@ const AddModal = () => {
       },
       response => {
         if (!response.didCancel && !response.error) {
-          setImageUri(response.assets[0].uri);
+          setImage(response.assets[0].uri);
           setImageBase64(response.assets[0].base64);
         }
       },
@@ -75,7 +82,7 @@ const AddModal = () => {
         } else if (response.errorCode) {
           console.log('拍照错误: ', response.errorMessage);
         } else {
-          setImageUri(response.assets[0].uri);
+          setImage(response.assets[0].uri);
           setImageBase64(response.assets[0].base64);
         }
       },
@@ -92,35 +99,38 @@ const AddModal = () => {
   };
 
   const handleAddItem = () => {
+    updateDateTime();
     if (name === '') {
       missingErrorAlert('物品名称');
-    } else if (quantity === '') {
+    } else if (count === '') {
       missingErrorAlert('数量');
     }
     dispatch(
       addItemSuccess({
-        imageUri,
+        image,
         imageBase64,
         name,
-        quantity,
+        count,
         expiryDate,
+        currentDateTime,
       }),
     );
 
     console.log({
-      imageUri,
-      imageBase64,
+      // image,
+      // imageBase64,
       name,
-      quantity,
+      quantity: count,
       expiryDate,
     });
+    navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>物品图像</Text>
-      {imageUri ? (
-        <Image source={{uri: imageUri}} style={styles.image} />
+      {image ? (
+        <Image source={{uri: image}} style={styles.image} />
       ) : (
         <View style={styles.placeholder}>
           <Text>未选择图像</Text>
@@ -142,7 +152,7 @@ const AddModal = () => {
       <Text style={styles.label}>数量</Text>
       <TextInput
         style={styles.input}
-        value={quantity}
+        value={count}
         onChangeText={setQuantity}
         placeholder="请输入数量"
         keyboardType="numeric"
