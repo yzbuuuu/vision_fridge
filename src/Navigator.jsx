@@ -24,6 +24,8 @@ import {
 } from './store/stateSlice/inventorySlice';
 import {addItemSuccess} from './store/stateSlice/manuallySlice';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import ItemDetailScreen from './screens/ItemDetailScreen';
+import {fetchImageRequest}from './store/stateSlice/inventorySlice'
 
 const Stack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -33,9 +35,9 @@ const renderRight = navigation => (
   <Button title="添加物品" onPress={() => navigation.navigate('addModal')} />
 );
 
-// const renderLeft = navigation => (
-//   <Button title="补货设置" onPress={() => navigation.navigate('ModalPage')} />
-// );
+const renderLeft = dispatch => (
+  <Button title="刷新" onPress={() => dispatch(fetchImageRequest())} />
+);
 
 const AddModal = ({navigation}) => {
   console.log('addmodalactivated');
@@ -46,9 +48,7 @@ const AddModal = ({navigation}) => {
   const [quantity, setQuantity] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [imageBase64, setImageBase64] = useState(null);
-  const [timestamp, setCurrentDateTime] = useState(
-    new Date().toString(),
-  );
+  const [timestamp, setCurrentDateTime] = useState(new Date().toString());
 
   const updateDateTime = () => {
     setCurrentDateTime(new Date().toLocaleString().toString());
@@ -176,24 +176,32 @@ const AddModal = ({navigation}) => {
   );
 };
 
-const MainStackNavigator = ({navigation}) => (
-  <MainStack.Navigator mode="modal">
-    <MainStack.Screen
-      name="mainScreen"
-      component={MainScreen}
-      options={{
-        title: '冰箱库存',
-        headerRight: () => renderRight(navigation),
-        // headerLeft: () => renderLeft(navigation),
-      }}
-    />
-    <MainStack.Screen
-      name="addModal"
-      component={AddModal}
-      options={{title: '添加物品'}}
-    />
-  </MainStack.Navigator>
-);
+const MainStackNavigator = ({navigation}) => {
+  const dispatch = useDispatch();
+  return (
+    <MainStack.Navigator mode="modal">
+      <MainStack.Screen
+        name="mainScreen"
+        component={MainScreen}
+        options={{
+          title: '冰箱库存',
+          headerRight: () => renderRight(navigation),
+          headerLeft: () => renderLeft(dispatch),
+        }}
+      />
+      <MainStack.Screen
+        name="addModal"
+        component={AddModal}
+        options={{title: '添加物品'}}
+      />
+      <MainStack.Screen
+        name="ItemDetail"
+        component={ItemDetailScreen}
+        options={{title: '详细信息'}}
+      />
+    </MainStack.Navigator>
+  );
+};
 
 const Navigation = () => {
   // const dispatch = useDispatch();

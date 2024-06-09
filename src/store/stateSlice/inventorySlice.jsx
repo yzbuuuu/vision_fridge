@@ -36,6 +36,13 @@ const inventorySlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    fetchImageRequest: state => {},
+    fetchImageSuccess: (state, action) => {
+      state.image = action.payload;
+    },
+    fetchImageFailure: (state, action) => {
+      state.error = action.payload;
+    },
   },
 });
 
@@ -46,6 +53,9 @@ export const {
   fetchHistoryRequest,
   fetchHistorySuccess,
   fetchHistoryFailure,
+  fetchImageRequest,
+  fetchImageSuccess,
+  fetchImageFailure,
 } = inventorySlice.actions;
 
 export default inventorySlice.reducer;

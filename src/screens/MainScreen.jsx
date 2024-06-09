@@ -1,31 +1,44 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Button, Modal, TouchableWithoutFeedback } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchLatestDetectionRequest } from '../store/stateSlice/inventorySlice';
-import { itemMap } from '../services/itemMap';
-import { itemImage } from '../img/imgService';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import {useSelector, useDispatch} from 'react-redux';
+import {fetchLatestDetectionRequest} from '../store/stateSlice/inventorySlice';
+import {expireMap, itemMap} from '../services/itemMap';
+import {itemImage} from '../img/imgService';
 
-const MainScreen = ({ navigation }) => {
+const MainScreen = ({navigation}) => {
   const latestDetection = useSelector(state => state.inventory.latestDetection);
   const manuallyAdded = useSelector(state => state.manually?.items || []);
   const dispatch = useDispatch();
-  const [displayMode, setDisplayMode] = useState('缩略');
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchLatestDetectionRequest());
   }, [dispatch]);
 
-  const data = latestDetection?.results?.map(item => ({
-    id: item.class_id,
-    name: itemMap[item.class_id],
-    timestamp: item.timestamp,
-    quantity: item.count,
-    image: itemImage(item.class_id),
-  })) || [];
+  const data =
+    latestDetection?.results?.map(item => ({
+      id: item.class_id,
+      name: itemMap[item.class_id],
+      timestamp: item.timestamp,
+      quantity: item.count,
+      image: itemImage(item.class_id),
+      editable: false, // 标识自动检测的数据不可编辑
+      expiryDate: expireMap[item.class_id],
+    })) || [];
 
-  // 将手动添加的数据合并到自动检测的数据中
-  const combinedData = data.concat(manuallyAdded);
+  // 将手动添加的数据合并到自动检测的数据中，并标识可编辑
+  const combinedData = data.concat(
+    manuallyAdded.map(item => ({
+      ...item,
+      editable: true, // 标识手动添加的数据可编辑
+    })),
+  );
 
   const formatTimestamp = timestamp => {
     const date = new Date(timestamp);
@@ -38,8 +51,12 @@ const MainScreen = ({ navigation }) => {
     return `${year}年${month}月${day}日 ${hours}:${minutes}`;
   };
 
-  const renderCard = ({ item }) => (
-    <TouchableOpacity style={styles.card}>
+  const renderCard = ({item}) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        navigation.navigate('ItemDetail', {item, editable: item.editable})
+      }>
       <Image source={item.image} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
@@ -50,11 +67,6 @@ const MainScreen = ({ navigation }) => {
       </View>
     </TouchableOpacity>
   );
-
-  const handleDisplayModeChange = mode => {
-    setDisplayMode(mode);
-    setShowModal(false);
-  };
 
   return (
     <View style={styles.container}>
@@ -71,17 +83,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  filter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-  },
-  buttonText: {
-    marginLeft: 10,
-    color: 'blue',
-    textDecorationLine: 'underline',
   },
   card: {
     flexDirection: 'row',
@@ -108,27 +109,6 @@ const styles = StyleSheet.create({
   quantity: {
     fontSize: 12,
     color: '#888',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalOption: {
-    fontSize: 18,
-    padding: 10,
   },
 });
 
