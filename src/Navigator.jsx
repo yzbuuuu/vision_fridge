@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -12,11 +12,14 @@ import {
   Button,
   TextInput,
   Alert,
+  ScrollView,
 } from 'react-native';
 import MainScreen from './screens/MainScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import {useDispatch, useSelector} from 'react-redux';
 import {Picker} from '@react-native-picker/picker';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import CustomPicker from './components/CustomPicker';
 
 import {
   fetchLatestDetectionRequest,
@@ -25,7 +28,7 @@ import {
 import {addItemSuccess} from './store/stateSlice/manuallySlice';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ItemDetailScreen from './screens/ItemDetailScreen';
-import {fetchImageRequest}from './store/stateSlice/inventorySlice'
+import {fetchImageRequest} from './store/stateSlice/inventorySlice';
 
 const Stack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -40,18 +43,16 @@ const renderLeft = dispatch => (
 );
 
 const AddModal = ({navigation}) => {
-  console.log('addmodalactivated');
-  // const manuallyAddItem = useSelector(state => state.manually.items);
   const dispatch = useDispatch();
   const [image, setImage] = useState(null);
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
+  const [expiryDays, setExpiryDays] = useState(1); // 初始保质期为1天
   const [imageBase64, setImageBase64] = useState(null);
-  const [timestamp, setCurrentDateTime] = useState(new Date().toString());
+  const [timestamp, setCurrentDateTime] = useState(new Date().toISOString());
 
   const updateDateTime = () => {
-    setCurrentDateTime(new Date().toLocaleString().toString());
+    setCurrentDateTime(new Date().toISOString());
   };
 
   const handleSelectImage = () => {
@@ -113,7 +114,7 @@ const AddModal = ({navigation}) => {
         imageBase64,
         name,
         quantity,
-        expiryDate,
+        expiryDate: expiryDays, // 使用天数作为保质期
         timestamp,
       }),
     );
@@ -123,55 +124,62 @@ const AddModal = ({navigation}) => {
       // imageBase64,
       name,
       quantity,
-      expiryDate,
-      currentDateTime: timestamp,
+      expiryDays,
+      timestamp,
     });
     navigation.goBack();
   };
 
+  const expiryDaysItems = useMemo(
+    () =>
+      [...Array(101).keys()].map(day => ({label: day.toString(), value: day})),
+    [],
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>物品图像</Text>
-      {image ? (
-        <Image source={{uri: image}} style={styles.image} />
-      ) : (
-        <View style={styles.placeholder}>
-          <Text>未选择图像</Text>
+      <ScrollView>
+        <Text style={styles.label}>物品图像</Text>
+        {image ? (
+          <Image source={{uri: image}} style={styles.image} />
+        ) : (
+          <View style={styles.placeholder}>
+            <Text>未选择图像</Text>
+          </View>
+        )}
+        <View style={styles.buttonContainer}>
+          <Button title="从相册选择" onPress={handleSelectImage} />
+          <Button title="拍照" onPress={handleTakePhoto} />
         </View>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button title="从相册选择" onPress={handleSelectImage} />
-        <Button title="拍照" onPress={handleTakePhoto} />
-      </View>
 
-      <Text style={styles.label}>物品名称</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="请输入物品名称"
-      />
+        <Text style={styles.label}>物品名称</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          placeholder="请输入物品名称"
+        />
 
-      <Text style={styles.label}>数量</Text>
-      <TextInput
-        style={styles.input}
-        value={quantity}
-        onChangeText={setQuantity}
-        placeholder="请输入数量"
-        keyboardType="numeric"
-      />
+        <Text style={styles.label}>数量</Text>
+        <TextInput
+          style={styles.input}
+          value={quantity}
+          onChangeText={setQuantity}
+          placeholder="请输入数量"
+          keyboardType="numeric"
+        />
 
-      <Text style={styles.label}>保质期</Text>
-      <TextInput
-        style={styles.input}
-        value={expiryDate}
-        onChangeText={setExpiryDate}
-        placeholder="请输入保质期"
-      />
+        <Text style={styles.label}>保质期（天）</Text>
+        <CustomPicker
+          label="选择保质期"
+          items={expiryDaysItems}
+          onValueChange={setExpiryDays}
+        />
 
-      <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-        <Text style={styles.addButtonText}>添加物品</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
+          <Text style={styles.addButtonText}>添加物品</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
@@ -266,6 +274,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
   addButton: {
     backgroundColor: '#007bff',
