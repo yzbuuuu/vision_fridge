@@ -33,9 +33,9 @@ const renderRight = navigation => (
   <Button title="添加物品" onPress={() => navigation.navigate('addModal')} />
 );
 
-const renderLeft = navigation => (
-  <Button title="补货设置" onPress={() => navigation.navigate('ModalPage')} />
-);
+// const renderLeft = navigation => (
+//   <Button title="补货设置" onPress={() => navigation.navigate('ModalPage')} />
+// );
 
 const AddModal = ({navigation}) => {
   console.log('addmodalactivated');
@@ -43,15 +43,15 @@ const AddModal = ({navigation}) => {
   const dispatch = useDispatch();
   const [image, setImage] = useState(null);
   const [name, setName] = useState('');
-  const [count, setQuantity] = useState('');
+  const [quantity, setQuantity] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [imageBase64, setImageBase64] = useState(null);
-  const [currentDateTime, setCurrentDateTime] = useState(
-    new Date(),
+  const [timestamp, setCurrentDateTime] = useState(
+    new Date().toString(),
   );
 
   const updateDateTime = () => {
-    setCurrentDateTime(new Date().toLocaleString());
+    setCurrentDateTime(new Date().toLocaleString().toString());
   };
 
   const handleSelectImage = () => {
@@ -102,17 +102,19 @@ const AddModal = ({navigation}) => {
     updateDateTime();
     if (name === '') {
       missingErrorAlert('物品名称');
-    } else if (count === '') {
+      return;
+    } else if (quantity === '') {
       missingErrorAlert('数量');
+      return;
     }
     dispatch(
       addItemSuccess({
         image,
         imageBase64,
         name,
-        count,
+        quantity,
         expiryDate,
-        currentDateTime,
+        timestamp,
       }),
     );
 
@@ -120,8 +122,9 @@ const AddModal = ({navigation}) => {
       // image,
       // imageBase64,
       name,
-      quantity: count,
+      quantity,
       expiryDate,
+      currentDateTime: timestamp,
     });
     navigation.goBack();
   };
@@ -152,7 +155,7 @@ const AddModal = ({navigation}) => {
       <Text style={styles.label}>数量</Text>
       <TextInput
         style={styles.input}
-        value={count}
+        value={quantity}
         onChangeText={setQuantity}
         placeholder="请输入数量"
         keyboardType="numeric"
@@ -181,7 +184,7 @@ const MainStackNavigator = ({navigation}) => (
       options={{
         title: '冰箱库存',
         headerRight: () => renderRight(navigation),
-        headerLeft: () => renderLeft(navigation),
+        // headerLeft: () => renderLeft(navigation),
       }}
     />
     <MainStack.Screen

@@ -1,23 +1,13 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Button,
-  Modal,
-  TouchableWithoutFeedback,
-} from 'react-native';
-import {useSelector, useDispatch} from 'react-redux';
-import {fetchLatestDetectionRequest} from '../store/stateSlice/inventorySlice';
-import {itemMap} from '../services/itemMap';
-import {itemImage} from '../img/imgService';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Button, Modal, TouchableWithoutFeedback } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchLatestDetectionRequest } from '../store/stateSlice/inventorySlice';
+import { itemMap } from '../services/itemMap';
+import { itemImage } from '../img/imgService';
 
-const MainScreen = ({navigation}) => {
+const MainScreen = ({ navigation }) => {
   const latestDetection = useSelector(state => state.inventory.latestDetection);
-  const manuallyAdded = useSelector(state => state.manually?.items);
+  const manuallyAdded = useSelector(state => state.manually?.items || []);
   const dispatch = useDispatch();
   const [displayMode, setDisplayMode] = useState('缩略');
   const [showModal, setShowModal] = useState(false);
@@ -26,36 +16,21 @@ const MainScreen = ({navigation}) => {
     dispatch(fetchLatestDetectionRequest());
   }, [dispatch]);
 
-  console.log('showlatestDetection');
-
   const data = latestDetection?.results?.map(item => ({
     id: item.class_id,
     name: itemMap[item.class_id],
     timestamp: item.timestamp,
     quantity: item.count,
     image: itemImage(item.class_id),
-  }));
+  })) || [];
 
-  console.log('manuallyAdded');
-  console.log(manuallyAdded);
-  if (manuallyAdded.length) {
-    console.log('showmanuallyAdded!!!!!');
-    data.push(manuallyAdded);
-  }
-  // const data = latestDetection.results?.map(item => ({
-  //   id: item.class_id,
-  //   name: itemMap[item.class_id],
-  //   timestamp: item.timestamp,
-  //   quantity: item.count,
-  //   image: itemImage(item.class_id),
-  // }));
-  console.log('data::::');
-  console.log(data);
+  // 将手动添加的数据合并到自动检测的数据中
+  const combinedData = data.concat(manuallyAdded);
 
   const formatTimestamp = timestamp => {
     const date = new Date(timestamp);
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based, so add 1
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -63,7 +38,7 @@ const MainScreen = ({navigation}) => {
     return `${year}年${month}月${day}日 ${hours}:${minutes}`;
   };
 
-  const renderCard = ({item}) => (
+  const renderCard = ({ item }) => (
     <TouchableOpacity style={styles.card}>
       <Image source={item.image} style={styles.image} />
       <View style={styles.info}>
@@ -84,9 +59,9 @@ const MainScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={combinedData}
         renderItem={renderCard}
-        // keyExtractor={item => item.id?.toString()}
+        keyExtractor={item => item.id?.toString()}
       />
     </View>
   );
@@ -146,7 +121,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{translateX: -50}, {translateY: -50}],
+    transform: [{ translateX: -50 }, { translateY: -50 }],
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
