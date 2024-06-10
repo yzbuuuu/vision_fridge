@@ -11,12 +11,12 @@ const inventorySlice = createSlice({
   name: 'inventory',
   initialState,
   reducers: {
-    fetchLatestDetectionRequest: (state) => {
+    fetchLatestDetectionRequest: state => {
       state.loading = true;
       state.error = null;
     },
     fetchLatestDetectionSuccess: (state, action) => {
-      console.log('fetchLatestDetectionSuccess!!!!!!')
+      console.log('fetchLatestDetectionSuccess!!!!!!');
       state.loading = false;
       state.latestDetection = action.payload;
     },
@@ -24,7 +24,7 @@ const inventorySlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    fetchHistoryRequest: (state) => {
+    fetchHistoryRequest: state => {
       state.loading = true;
       state.error = null;
     },
@@ -36,9 +36,13 @@ const inventorySlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    fetchImageRequest: state => {},
+    fetchImageRequest: state => {
+      state.loading = true;
+      state.error = null;
+    },
     fetchImageSuccess: (state, action) => {
       state.image = action.payload;
+      state.loading = false;
     },
     fetchImageFailure: (state, action) => {
       state.error = action.payload;

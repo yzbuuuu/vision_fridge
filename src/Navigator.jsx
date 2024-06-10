@@ -48,7 +48,6 @@ const AddModal = ({navigation}) => {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [expiryDays, setExpiryDays] = useState(1); // 初始保质期为1天
-  const [imageBase64, setImageBase64] = useState(null);
   const [timestamp, setCurrentDateTime] = useState(new Date().toISOString());
 
   const updateDateTime = () => {
@@ -59,12 +58,11 @@ const AddModal = ({navigation}) => {
     launchImageLibrary(
       {
         mediaType: 'photo',
-        includeBase64: true,
+        includeBase64: false,
       },
       response => {
         if (!response.didCancel && !response.error) {
-          setImage(response.assets[0].uri);
-          setImageBase64(response.assets[0].base64);
+          setImage({ uri: response.assets[0].uri });
         }
       },
     );
@@ -75,7 +73,7 @@ const AddModal = ({navigation}) => {
       {
         mediaType: 'photo',
         saveToPhotos: true,
-        includeBase64: true,
+        includeBase64: false,
       },
       response => {
         if (response.didCancel) {
@@ -83,8 +81,7 @@ const AddModal = ({navigation}) => {
         } else if (response.errorCode) {
           console.log('拍照错误: ', response.errorMessage);
         } else {
-          setImage(response.assets[0].uri);
-          setImageBase64(response.assets[0].base64);
+          setImage({ uri: response.assets[0].uri });
         }
       },
     );
@@ -110,8 +107,7 @@ const AddModal = ({navigation}) => {
     }
     dispatch(
       addItemSuccess({
-        image,
-        imageBase64,
+        image, // 统一使用对象格式存储图像
         name,
         quantity,
         expiryDate: expiryDays, // 使用天数作为保质期
@@ -120,8 +116,7 @@ const AddModal = ({navigation}) => {
     );
 
     console.log({
-      // image,
-      // imageBase64,
+      image,
       name,
       quantity,
       expiryDays,
@@ -130,56 +125,50 @@ const AddModal = ({navigation}) => {
     navigation.goBack();
   };
 
-  const expiryDaysItems = useMemo(
-    () =>
-      [...Array(101).keys()].map(day => ({label: day.toString(), value: day})),
-    [],
-  );
+  const expiryDaysItems = [...Array(101).keys()].map(day => ({label: day.toString(), value: day}));
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <Text style={styles.label}>物品图像</Text>
-        {image ? (
-          <Image source={{uri: image}} style={styles.image} />
-        ) : (
-          <View style={styles.placeholder}>
-            <Text>未选择图像</Text>
-          </View>
-        )}
-        <View style={styles.buttonContainer}>
-          <Button title="从相册选择" onPress={handleSelectImage} />
-          <Button title="拍照" onPress={handleTakePhoto} />
+      <Text style={styles.label}>物品图像</Text>
+      {image ? (
+        <Image source={image} style={styles.image} />
+      ) : (
+        <View style={styles.placeholder}>
+          <Text>未选择图像</Text>
         </View>
+      )}
+      <View style={styles.buttonContainer}>
+        <Button title="从相册选择" onPress={handleSelectImage} />
+        <Button title="拍照" onPress={handleTakePhoto} />
+      </View>
 
-        <Text style={styles.label}>物品名称</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="请输入物品名称"
-        />
+      <Text style={styles.label}>物品名称</Text>
+      <TextInput
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+        placeholder="请输入物品名称"
+      />
 
-        <Text style={styles.label}>数量</Text>
-        <TextInput
-          style={styles.input}
-          value={quantity}
-          onChangeText={setQuantity}
-          placeholder="请输入数量"
-          keyboardType="numeric"
-        />
+      <Text style={styles.label}>数量</Text>
+      <TextInput
+        style={styles.input}
+        value={quantity}
+        onChangeText={setQuantity}
+        placeholder="请输入数量"
+        keyboardType="numeric"
+      />
 
-        <Text style={styles.label}>保质期（天）</Text>
-        <CustomPicker
-          label="选择保质期"
-          items={expiryDaysItems}
-          onValueChange={setExpiryDays}
-        />
+      <Text style={styles.label}>保质期（天）</Text>
+      <CustomPicker
+        label="选择保质期"
+        items={expiryDaysItems}
+        onValueChange={setExpiryDays}
+      />
 
-        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-          <Text style={styles.addButtonText}>添加物品</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
+        <Text style={styles.addButtonText}>添加物品</Text>
+      </TouchableOpacity>
     </View>
   );
 };
