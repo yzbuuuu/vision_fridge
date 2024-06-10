@@ -25,8 +25,7 @@ const ItemDetailScreen = ({route, navigation}) => {
 
   useEffect(() => {
     setCalculatedExpiry(manExpiryDateCal());
-  }, [expiryDate, manExpiryDateCal]);
-
+  }, [expiryDate]);
 
   const handleUpdate = () => {
     dispatch(
@@ -76,7 +75,7 @@ const ItemDetailScreen = ({route, navigation}) => {
       (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
 
-    const itemShelfLife = item.expiryDate;
+    const itemShelfLife = expiryDate;
     const remainingDays = itemShelfLife - daysDiff;
     const remainingHours = 24 - hoursDiff; // Calculate the remaining hours in the current day
 
@@ -119,7 +118,7 @@ const ItemDetailScreen = ({route, navigation}) => {
           initialVal={expiryDate}
         />
       ) : editable ? (
-        <Text style={styles.value}>{manExpiryDateCal()}</Text>
+        <Text style={styles.value}>{calculatedExpiry}</Text>
       ) : (
         <Text style={styles.value}>{expiryDateCal()}</Text>
       )}

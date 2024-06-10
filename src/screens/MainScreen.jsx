@@ -1,4 +1,3 @@
-// mainScreen.jsx
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -9,6 +8,7 @@ import {
   Image,
   Modal,
   ActivityIndicator,
+  Button,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {fetchLatestDetectionRequest} from '../store/stateSlice/inventorySlice';
@@ -20,6 +20,8 @@ const MainScreen = ({navigation}) => {
   const manuallyAdded = useSelector(state => state.manually?.items || []);
   const loading = useSelector(state => state.inventory.loading);
   const dispatch = useDispatch();
+
+  const [showImageModal, setShowImageModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchLatestDetectionRequest());
@@ -103,11 +105,32 @@ const MainScreen = ({navigation}) => {
         </Modal>
       )}
 
+      <View style={styles.topBox}>
+        {/* <Text>检测信息</Text> */}
+        <Button title="查看检测图像" onPress={() => setShowImageModal(true)} />
+      </View>
+
       <FlatList
         data={combinedData}
         renderItem={renderCard}
         keyExtractor={(item, index) => index.toString()}
       />
+
+      {latestDetection.image && (
+        <Modal
+          visible={showImageModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowImageModal(false)}>
+          <View style={styles.imageModal}>
+            <Image
+              source={{uri: latestDetection.image}}
+              style={styles.detectionImage}
+            />
+            <Button title="关闭" onPress={() => setShowImageModal(false)} />
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -116,6 +139,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  topBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   card: {
     flexDirection: 'row',
@@ -165,6 +196,32 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
     marginTop: 4,
+  },
+  imageModal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.8)',
+  },
+  detectionImage: {
+    width: '90%',
+    height: '70%',
+    resizeMode: 'contain',
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#00000040',
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 100,
+    width: 100,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

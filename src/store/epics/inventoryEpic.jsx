@@ -44,13 +44,11 @@ export const fetchLatestDetectionEpic = action$ =>
 export const fetchHistoryEpic = action$ =>
   action$.pipe(
     ofType(fetchHistoryRequest.type),
-    mergeMap(action =>
-      ajax
-        .getJSON(`${GETHISTORY_URL}?timestamp=${encodeURIComponent(action.payload)}`)
-        .pipe(
-          map(response => fetchHistorySuccess(JSON.parse(response))),
-          catchError(error => of(fetchHistoryFailure(error.message))),
-        ),
+    mergeMap(() =>
+      ajax.getJSON(GETHISTORY_URL).pipe(
+        map(response => fetchHistorySuccess(response)),
+        catchError(error => of(fetchHistoryFailure(error.message))),
+      ),
     ),
   );
 

@@ -212,7 +212,7 @@ const Navigation = () => {
         <Tab.Screen
           name="Main"
           component={MainStackNavigator}
-          options={{headerShown: false}}
+          options={{headerShown: false,title: '冰箱库存'}}
         />
         <Tab.Screen
           name="History"
