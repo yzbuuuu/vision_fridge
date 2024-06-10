@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import MainScreen from './screens/MainScreen';
 import HistoryScreen from './screens/HistoryScreen';
+import HistoryDetailScreen from './screens/HistoryDetailScreen';
 import {useDispatch, useSelector} from 'react-redux';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -62,7 +63,7 @@ const AddModal = ({navigation}) => {
       },
       response => {
         if (!response.didCancel && !response.error) {
-          setImage({ uri: response.assets[0].uri });
+          setImage({uri: response.assets[0].uri});
         }
       },
     );
@@ -81,7 +82,7 @@ const AddModal = ({navigation}) => {
         } else if (response.errorCode) {
           console.log('拍照错误: ', response.errorMessage);
         } else {
-          setImage({ uri: response.assets[0].uri });
+          setImage({uri: response.assets[0].uri});
         }
       },
     );
@@ -125,7 +126,10 @@ const AddModal = ({navigation}) => {
     navigation.goBack();
   };
 
-  const expiryDaysItems = [...Array(101).keys()].map(day => ({label: day.toString(), value: day}));
+  const expiryDaysItems = [...Array(101).keys()].map(day => ({
+    label: day.toString(),
+    value: day,
+  }));
 
   return (
     <View style={styles.container}>
@@ -199,6 +203,20 @@ const MainStackNavigator = ({navigation}) => {
     </MainStack.Navigator>
   );
 };
+const HistoryStackNavigator = ({navigation}) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="HistoryScreen"
+      component={HistoryScreen}
+      options={{title: '历史记录'}}
+    />
+    <Stack.Screen
+      name="HistoryDetail"
+      component={HistoryDetailScreen}
+      options={{title: '详细信息'}}
+    />
+  </Stack.Navigator>
+);
 
 const Navigation = () => {
   // const dispatch = useDispatch();
@@ -212,12 +230,12 @@ const Navigation = () => {
         <Tab.Screen
           name="Main"
           component={MainStackNavigator}
-          options={{headerShown: false,title: '冰箱库存'}}
+          options={{headerShown: false, title: '冰箱库存'}}
         />
         <Tab.Screen
           name="History"
-          component={HistoryScreen}
-          options={{title: '历史记录'}}
+          component={HistoryStackNavigator}
+          options={{title: '历史记录',headerShown: false}}
         />
       </Tab.Navigator>
     </NavigationContainer>

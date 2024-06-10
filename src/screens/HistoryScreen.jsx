@@ -1,10 +1,10 @@
 // HistoryScreen.jsx
 import React, { useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchHistoryRequest } from '../store/stateSlice/inventorySlice';
 
-const HistoryScreen = () => {
+const HistoryScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const history = useSelector(state => state.inventory.history);
   const loading = useSelector(state => state.inventory.loading);
@@ -14,14 +14,13 @@ const HistoryScreen = () => {
   }, [dispatch]);
 
   const renderHistoryItem = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('HistoryDetail', { item })}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.timestamp}>检测时间: {new Date(item.timestamp).toLocaleString()}</Text>
-        {/* <Text style={styles.quantity}>数量: {item.quantity}</Text> */}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
