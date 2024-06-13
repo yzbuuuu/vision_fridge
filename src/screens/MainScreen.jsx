@@ -116,7 +116,7 @@ const MainScreen = ({navigation}) => {
         keyExtractor={(item, index) => index.toString()}
       />
 
-      {latestDetection.image && (
+      {latestDetection?.image && (
         <Modal
           visible={showImageModal}
           transparent={true}

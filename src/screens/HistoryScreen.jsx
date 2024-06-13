@@ -17,8 +17,7 @@ const HistoryScreen = ({ navigation }) => {
     <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('HistoryDetail', { item })}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <View style={styles.info}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.timestamp}>检测时间: {new Date(item.timestamp).toLocaleString()}</Text>
+        <Text style={styles.name}>{new Date(item.timestamp).toLocaleString()}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -72,14 +71,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#888',
-  },
-  quantity: {
-    fontSize: 12,
-    color: '#888',
   },
 });
 

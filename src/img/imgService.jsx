@@ -32,6 +32,7 @@ import img21 from './21.jpeg';
 
 
 
+
 export const itemImage = id => {
     switch (id) {
       case '0':

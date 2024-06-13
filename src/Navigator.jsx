@@ -30,6 +30,7 @@ import {addItemSuccess} from './store/stateSlice/manuallySlice';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ItemDetailScreen from './screens/ItemDetailScreen';
 import {fetchImageRequest} from './store/stateSlice/inventorySlice';
+import HomeScreen from './screens/HomeScreen';
 
 const Stack = createStackNavigator();
 const MainStack = createStackNavigator();
@@ -226,7 +227,12 @@ const Navigation = () => {
 
   return (
     <NavigationContainer>
-      <Tab.Navigator initialRouteName="Main">
+      <Tab.Navigator initialRouteName="HomeScreen">
+        <Tab.Screen
+          name="HomeScreen"
+          component={HomeScreen}
+          options={{title:'主页'}}
+        />
         <Tab.Screen
           name="Main"
           component={MainStackNavigator}
